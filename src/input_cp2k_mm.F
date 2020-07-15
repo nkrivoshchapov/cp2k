@@ -257,7 +257,25 @@ CONTAINS
                           usage="VDW_SCALE14 1.0", default_r_val=1.0_dp)
       CALL section_add_keyword(section, keyword)
       CALL keyword_release(keyword)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!! 
+      CALL keyword_create(keyword, __LOCATION__, name="FORCE_SCALE", &
+                          description="Scaling factor for all forces", &
+                          usage="FORCE_SCALE 1.0", default_r_val=1.0_dp)
+      CALL section_add_keyword(section, keyword)
+      CALL keyword_release(keyword)
 
+      CALL keyword_create(keyword, __LOCATION__, name="ALL_VDW_SCALE", &
+                          description="Scaling factor for the VDW-interactions", &
+                          usage="ALL_VDW_SCALE 1.0", default_r_val=1.0_dp)
+      CALL section_add_keyword(section, keyword)
+      CALL keyword_release(keyword)
+
+      CALL keyword_create(keyword, __LOCATION__, name="ALL_EI_SCALE", &
+                          description="Scaling factor for the ES-interactions", &
+                          usage="ALL_EI_SCALE 1.0", default_r_val=1.0_dp)
+      CALL section_add_keyword(section, keyword)
+      CALL keyword_release(keyword)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!
       CALL keyword_create(keyword, __LOCATION__, name="EI_SCALE14", &
                           description="Scaling factor for the electrostatics 1-4 ", &
                           usage="EI_SCALE14 1.0", default_r_val=0.0_dp)
