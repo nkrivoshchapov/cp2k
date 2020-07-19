@@ -604,7 +604,8 @@ CONTAINS
                                     "; increase EMAX_SPLINE."
                                  IF (rab2 < rab2_min/(1.06_dp)**2) THEN
                                     IF (geo_check) THEN
-                                       CPABORT("GEOMETRY wrong or EMAX_SPLINE too small!")
+                                       WRITE(*,'(A)') "GEOMETRY wrong"
+!                                       CPABORT("GEOMETRY wrong or EMAX_SPLINE too small!")
                                     END IF
                                  END IF
                               END IF

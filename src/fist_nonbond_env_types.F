@@ -54,8 +54,13 @@ MODULE fist_nonbond_env_types
       INTEGER :: counter, last_update, num_update
       LOGICAL :: do_nonbonded, shift_cutoff
       CHARACTER(len=default_string_length)   :: unit_type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       REAL(KIND=dp)                              :: lup, aup, ei_scale14, &
-                                                    vdw_scale14
+                                                    vdw_scale14, all_ei_scale, all_vdw_scale, &
+                                                    all_forces_scale
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated           (in fist_env_get _set _create _init)  !!!!!!
+
       REAL(KIND=dp)                              :: long_range_correction
       REAL(KIND=dp), DIMENSION(:, :), POINTER :: rlist_cut, rlist_lowsq, ij_kind_full_fac
       REAL(KIND=dp), DIMENSION(:), POINTER    :: charges
@@ -107,13 +112,14 @@ CONTAINS
                                    shift_cutoff, r_last_update, r_last_update_pbc, rshell_last_update_pbc, &
                                    rcore_last_update_pbc, cell_last_update, num_update, last_update, &
                                    counter, natom_types, long_range_correction, ij_kind_full_fac, eam_data, &
-                                   quip_data, charges)
+                                   quip_data, charges, all_ei_scale, all_forces_scale, all_vdw_scale)
 
       TYPE(fist_nonbond_env_type), POINTER               :: fist_nonbond_env
       TYPE(pair_potential_pp_type), OPTIONAL, POINTER    :: potparm14, potparm
       TYPE(fist_neighbor_type), OPTIONAL, POINTER        :: nonbonded
       REAL(KIND=dp), DIMENSION(:, :), OPTIONAL, POINTER  :: rlist_cut, rlist_lowsq
-      REAL(KIND=dp), OPTIONAL                            :: aup, lup, ei_scale14, vdw_scale14
+      REAL(KIND=dp), OPTIONAL                            :: aup, lup, ei_scale14, vdw_scale14, &
+                                                            all_ei_scale, all_forces_scale, all_vdw_scale
       LOGICAL, INTENT(OUT), OPTIONAL                     :: shift_cutoff
       TYPE(pos_type), DIMENSION(:), OPTIONAL, POINTER    :: r_last_update, r_last_update_pbc, &
                                                             rshell_last_update_pbc, &
@@ -150,6 +156,11 @@ CONTAINS
       IF (PRESENT(aup)) aup = fist_nonbond_env%aup
       IF (PRESENT(ei_scale14)) ei_scale14 = fist_nonbond_env%ei_scale14
       IF (PRESENT(vdw_scale14)) vdw_scale14 = fist_nonbond_env%vdw_scale14
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      IF (PRESENT(all_vdw_scale)) all_vdw_scale = fist_nonbond_env%all_vdw_scale
+      IF (PRESENT(all_ei_scale)) all_ei_scale = fist_nonbond_env%all_ei_scale
+      IF (PRESENT(all_forces_scale)) all_forces_scale = fist_nonbond_env%all_forces_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       IF (PRESENT(shift_cutoff)) &
          shift_cutoff = fist_nonbond_env%shift_cutoff
       IF (PRESENT(natom_types)) natom_types = fist_nonbond_env%natom_types
@@ -194,13 +205,15 @@ CONTAINS
                                    rlist_cut, rlist_lowsq, nonbonded, aup, lup, ei_scale14, vdw_scale14, &
                                    shift_cutoff, r_last_update, r_last_update_pbc, rshell_last_update_pbc, &
                                    rcore_last_update_pbc, cell_last_update, num_update, last_update, &
-                                   counter, natom_types, long_range_correction, eam_data, quip_data, charges)
+                                   counter, natom_types, long_range_correction, eam_data, quip_data, charges, &
+                                   all_ei_scale, all_vdw_scale, all_forces_scale)
 
       TYPE(fist_nonbond_env_type), POINTER               :: fist_nonbond_env
       TYPE(pair_potential_pp_type), OPTIONAL, POINTER    :: potparm14, potparm
       REAL(KIND=dp), DIMENSION(:, :), OPTIONAL, POINTER  :: rlist_cut, rlist_lowsq
       TYPE(fist_neighbor_type), OPTIONAL, POINTER        :: nonbonded
-      REAL(KIND=dp), OPTIONAL                            :: aup, lup, ei_scale14, vdw_scale14
+      REAL(KIND=dp), OPTIONAL                            :: aup, lup, ei_scale14, vdw_scale14, &
+                                                            all_ei_scale, all_vdw_scale, all_forces_scale
       LOGICAL, INTENT(IN), OPTIONAL                      :: shift_cutoff
       TYPE(pos_type), DIMENSION(:), OPTIONAL, POINTER    :: r_last_update, r_last_update_pbc, &
                                                             rshell_last_update_pbc, &
@@ -235,6 +248,13 @@ CONTAINS
       IF (PRESENT(aup)) fist_nonbond_env%aup = aup
       IF (PRESENT(ei_scale14)) fist_nonbond_env%ei_scale14 = ei_scale14
       IF (PRESENT(vdw_scale14)) fist_nonbond_env%vdw_scale14 = vdw_scale14
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      IF (PRESENT(all_ei_scale)) fist_nonbond_env%all_ei_scale = all_ei_scale
+      IF (PRESENT(all_vdw_scale)) fist_nonbond_env%all_vdw_scale = all_vdw_scale
+      IF (PRESENT(all_forces_scale)) fist_nonbond_env%all_forces_scale = all_forces_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       IF (PRESENT(shift_cutoff)) &
          fist_nonbond_env%shift_cutoff = shift_cutoff
       IF (PRESENT(natom_types)) fist_nonbond_env%natom_types = natom_types
@@ -263,13 +283,13 @@ CONTAINS
 ! **************************************************************************************************
    SUBROUTINE fist_nonbond_env_create(fist_nonbond_env, atomic_kind_set, &
                                       potparm14, potparm, do_nonbonded, verlet_skin, ewald_rcut, ei_scale14, &
-                                      vdw_scale14, shift_cutoff)
+                                      vdw_scale14, shift_cutoff, all_ei_scale, all_vdw_scale, all_forces_scale)
       TYPE(fist_nonbond_env_type), POINTER               :: fist_nonbond_env
       TYPE(atomic_kind_type), DIMENSION(:), POINTER      :: atomic_kind_set
       TYPE(pair_potential_pp_type), OPTIONAL, POINTER    :: potparm14, potparm
       LOGICAL, INTENT(IN)                                :: do_nonbonded
       REAL(KIND=dp), INTENT(IN)                          :: verlet_skin, ewald_rcut, ei_scale14, &
-                                                            vdw_scale14
+                                                            vdw_scale14, all_ei_scale, all_vdw_scale, all_forces_scale
       LOGICAL, INTENT(IN)                                :: shift_cutoff
 
       CHARACTER(len=*), PARAMETER :: routineN = 'fist_nonbond_env_create', &
@@ -292,7 +312,7 @@ CONTAINS
       NULLIFY (fist_nonbond_env%charges)
       CALL init_fist_nonbond_env(fist_nonbond_env, atomic_kind_set, potparm14, &
                                  potparm, do_nonbonded, verlet_skin, ewald_rcut, ei_scale14, vdw_scale14, &
-                                 shift_cutoff)
+                                 shift_cutoff, all_ei_scale, all_vdw_scale, all_forces_scale)
    END SUBROUTINE fist_nonbond_env_create
 
 ! **************************************************************************************************
@@ -310,14 +330,14 @@ CONTAINS
 ! **************************************************************************************************
    SUBROUTINE init_fist_nonbond_env(fist_nonbond_env, atomic_kind_set, &
                                     potparm14, potparm, do_nonbonded, verlet_skin, ewald_rcut, ei_scale14, &
-                                    vdw_scale14, shift_cutoff)
+                                    vdw_scale14, shift_cutoff, all_ei_scale, all_vdw_scale, all_forces_scale)
 
       TYPE(fist_nonbond_env_type), POINTER               :: fist_nonbond_env
       TYPE(atomic_kind_type), DIMENSION(:), POINTER      :: atomic_kind_set
       TYPE(pair_potential_pp_type), OPTIONAL, POINTER    :: potparm14, potparm
       LOGICAL, INTENT(IN)                                :: do_nonbonded
       REAL(KIND=dp), INTENT(IN)                          :: verlet_skin, ewald_rcut, ei_scale14, &
-                                                            vdw_scale14
+                                                            vdw_scale14, all_ei_scale, all_vdw_scale, all_forces_scale
       LOGICAL, INTENT(IN)                                :: shift_cutoff
 
       CHARACTER(len=*), PARAMETER :: routineN = 'init_fist_nonbond_env', &
@@ -346,6 +366,13 @@ CONTAINS
       fist_nonbond_env%aup = 0
       fist_nonbond_env%ei_scale14 = ei_scale14
       fist_nonbond_env%vdw_scale14 = vdw_scale14
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      fist_nonbond_env%all_vdw_scale = all_vdw_scale
+      fist_nonbond_env%all_ei_scale = all_ei_scale
+      fist_nonbond_env%all_forces_scale = all_forces_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       fist_nonbond_env%shift_cutoff = shift_cutoff
       fist_nonbond_env%counter = 0
       fist_nonbond_env%last_update = 0

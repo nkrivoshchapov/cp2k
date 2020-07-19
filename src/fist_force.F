@@ -46,7 +46,10 @@ MODULE fist_force
                                               fist_environment_type
    USE fist_intra_force,                ONLY: force_intra_control
    USE fist_neighbor_list_control,      ONLY: list_control
-   USE fist_nonbond_env_types,          ONLY: fist_nonbond_env_type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   USE fist_nonbond_env_types,          ONLY: fist_nonbond_env_type,&
+                                              fist_nonbond_env_get
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    USE fist_nonbond_force,              ONLY: bonded_correct_gaussian,&
                                               force_nonbond
    USE fist_pol_scf,                    ONLY: fist_pol_evaluate
@@ -121,9 +124,11 @@ CONTAINS
          nparticle_local, nshell, shell_index
       LOGICAL                                            :: do_multipoles, shell_model_ad, &
                                                             shell_present, use_virial
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       REAL(KIND=dp) :: ef_ener, fc, fs, mass, pot_bend, pot_bond, pot_imptors, pot_manybody, &
          pot_nonbond, pot_opbend, pot_shell, pot_torsion, pot_urey_bradley, vg_coulomb, xdum1, &
-         xdum2, xdum3
+         xdum2, xdum3, all_ei_scale, all_vdw_scale, all_forces_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: ef_f, f_nonbond, f_total, fcore_nonbond, &
          fcore_shell_bonded, fcore_total, fg_coulomb, fgcore_coulomb, fgshell_coulomb, &
          fshell_nonbond, fshell_total
@@ -193,6 +198,11 @@ CONTAINS
 
       CALL ewald_env_get(ewald_env, ewald_type=ewald_type, do_multipoles=do_multipoles, &
                          do_ipol=do_ipol)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      CALL fist_nonbond_env_get(fist_nonbond_env, all_ei_scale = all_ei_scale, all_vdw_scale = all_vdw_scale, &
+                                all_forces_scale = all_forces_scale)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ! Initialize ewald grids
       CALL init_cell(cell)
@@ -279,6 +289,11 @@ CONTAINS
       thermo%pot = 0.0_dp
       thermo%harm_shell = 0.0_dp
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: FORCES IN INPUT..."
+!      WRITE (*, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, SIZE(particle_set))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       ! Get real-space non-bonded forces:
       IF (iw > 0) THEN
          WRITE (iw, '(A)') " FIST:: FORCES IN INPUT..."
@@ -309,6 +324,16 @@ CONTAINS
          END IF
       END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      f_nonbond=f_nonbond*all_forces_scale
+!      WRITE (*, '(A)') " FIST:: NONBOND + R-SPACE ELECTROSTATIC FORCES ..."
+!      WRITE (*, '(3f15.9)') f_nonbond
+!      WRITE (*, '(A13)') ewald_type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
       IF (iw > 0) THEN
          WRITE (iw, '(A)') " FIST:: NONBOND + R-SPACE ELECTROSTATIC FORCES ..."
          WRITE (iw, '(3f15.9)') f_nonbond
@@ -322,6 +347,9 @@ CONTAINS
 
       ! Get g-space non-bonded forces:
       IF (ewald_type /= do_ewald_none) THEN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         WRITE (*, '(A)') "ewald_type /= do_ewald_none"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          ! Determine size of the forces array
          SELECT CASE (ewald_type)
          CASE (do_ewald_ewald)
@@ -338,6 +366,7 @@ CONTAINS
             fgshell_coulomb = 0.0_dp
             fgcore_coulomb = 0.0_dp
          END IF
+
          IF (shell_present .AND. do_multipoles) THEN
             CPABORT("Multipoles and Core-Shell model not implemented.")
          END IF
@@ -463,10 +492,16 @@ CONTAINS
             END SELECT
          END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modidicated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: NB_ES IN G-SPACE... 1"
+!      WRITE (*, '(3f15.9)') ((fg_coulomb(j, i), j=1, 3), i=1, SIZE(fg_coulomb, 2))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modidicated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
          ! Subtract the interaction between screening charges. This is a
          ! correction in real-space and depends on the neighborlists. Therefore
          ! it is only executed if fist_nonbond_env%do_nonbonded is set.
          IF (fist_nonbond_env%do_nonbonded) THEN
+            WRITE (*, '(A)') "do_nonbonded = true"       !!!!!!!!!!!!!!!MOD
             ! Correction for core-shell model
             IF (shell_present) THEN
                CALL bonded_correct_gaussian(fist_nonbond_env, atomic_kind_set, &
@@ -482,6 +517,8 @@ CONTAINS
                                                use_virial=use_virial)
                END IF
             END IF
+         ELSE                       !!!!!!!!!!!!!!!!!!!!!!!MOD
+            WRITE (*, '(A)') "do_nonbonded = false"     !!!!!!!!!!!!!!!MOD
          END IF
 
          IF (.NOT. do_multipoles) THEN
@@ -509,6 +546,29 @@ CONTAINS
             WRITE (iw, '(3f15.9)') ((fgcore_coulomb(j, i), j=1, 3), i=1, SIZE(fgcore_coulomb, 2))
          END IF
       END IF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modidicated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
+!      WRITE (*, '(3f15.9)') ((fg_coulomb(j, i), j=1, 3), i=1, SIZE(fg_coulomb, 2))
+      WRITE (*, '(A)') "PV_G inital"
+      WRITE (*, '(3f15.9)') pv_g
+      WRITE (*, '(A)') "PV_BC inital"
+      WRITE (*, '(3f15.9)') pv_bc
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modidicated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: CORRECTED_0"
+!      WRITE (*, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, SIZE(particle_set))
+      DO i = 1, natoms
+         particle_set(i)%f(1) = all_forces_scale*particle_set(i)%f(1)
+         particle_set(i)%f(2) = all_forces_scale*particle_set(i)%f(2)
+         particle_set(i)%f(3) = all_forces_scale*particle_set(i)%f(3)
+      ENDDO
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: CORRECTED_1"
+!      WRITE (*, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, SIZE(particle_set))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ! calculate the action of an (external) electric field
       IF (efield%apply_field) THEN
@@ -581,10 +641,33 @@ CONTAINS
          END IF
       END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST:: CORRECTED BONDED ELECTROSTATIC FORCES + INTERNAL FORCES..."
+!      WRITE (*, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, SIZE(particle_set))
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       ! add up all the potential energies
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      pot_nonbond = pot_nonbond*all_vdw_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       thermo%pot = pot_nonbond + pot_bond + pot_bend + pot_torsion + pot_opbend + &
                    pot_imptors + pot_urey_bradley + pot_manybody + pot_shell
-
+      
+!      WRITE (*, '(A,f15.9)') " ! pot_nonbond = ", pot_nonbond
+!      WRITE (*, '(A,f15.9)') " ! pot_bond =  ", pot_bond
+!      WRITE (*, '(A,f15.9)') " ! pot_bend = ", pot_bend
+      
+!      WRITE (*, '(A,f15.9)') " ! pot_torsion = ", pot_torsion
+!      WRITE (*, '(A,f15.9)') " ! pot_opbend = ", pot_opbend
+!      WRITE (*, '(A,f15.9)') " ! pot_imptors = ", pot_imptors
+      
+!      WRITE (*, '(A,f15.9)') " ! pot_urey_bradley = ", pot_urey_bradley
+!      WRITE (*, '(A,f15.9)') " ! pot_manybody =  ", pot_manybody
+!      WRITE (*, '(A,f15.9)') " ! pot_shell = ", pot_shell
+      
+!      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 1 (588) is equal to ", thermo%pot
+!      WRITE (*, '(A,f15.9)') " MODIFICATION! thermo%pot at point 1 (588) is equal to ", thermo%pot
+      
       CALL mp_sum(thermo%pot, para_env%group)
 
       IF (shell_present) THEN
@@ -596,12 +679,27 @@ CONTAINS
          ! e_self, e_neut, and ebonded are already summed over all processors
          ! vg_coulomb is not calculated in parallel
          thermo%e_gspace = vg_coulomb
+!         WRITE (*, '(A,f15.9)') " ! vg_coulomb = ", vg_coulomb
+         
          thermo%pot = thermo%pot + thermo%e_self + thermo%e_neut
+!         WRITE (*, '(A,f15.9)') " ! e_self = ", thermo%e_self
+!         WRITE (*, '(A,f15.9)') " ! e_neut = ", thermo%e_neut
+         
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+         thermo%e_bonded = thermo%e_bonded*all_ei_scale
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          thermo%pot = thermo%pot + vg_coulomb + thermo%e_bonded
+!         WRITE (*, '(A,f15.9)') " ! e_bonded = ", thermo%e_bonded
          ! add the induction energy of the dipoles for polarizable models
          IF (do_ipol /= do_fist_pol_none) thermo%pot = thermo%pot + thermo%e_induction
+!         WRITE (*, '(A,f15.9)') " ! e_induction = ", thermo%e_induction
       END IF
-
+      
+!      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 2 (607) is equal to ", thermo%pot
+!      WRITE (*, '(A,f15.9)') " MODIFICATION! thermo%pot at point 2 (607) is equal to ", thermo%pot
+	  
       ! add up all the forces
       !
       ! nonbonded forces might be calculated for atoms not on this node
@@ -610,6 +708,12 @@ CONTAINS
       ! global sum in the parallel code and in the end copy them back to part
       ALLOCATE (f_total(3, natoms))
       f_total = 0.0_dp
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST::(1)INT+ES_B+NB 0"
+!      WRITE (*, '(3f15.9)') ((f_total(j, i), j=1, 3), i=1, natoms)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       DO i = 1, natoms
          f_total(1, i) = particle_set(i)%f(1) + f_nonbond(1, i)
          f_total(2, i) = particle_set(i)%f(2) + f_nonbond(2, i)
@@ -640,6 +744,14 @@ CONTAINS
             WRITE (iw, '(3f15.9)') ((fcore_total(j, i), j=1, 3), i=1, nshell)
          END IF
       END IF
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST::(1)INTERNAL + ELECTROSTATIC BONDED + NONBONDED"
+!      WRITE (*, '(3f15.9)') ((f_total(j, i), j=1, 3), i=1, natoms)
+!      WRITE (*, '(A)') " FIST::(2)TOTAL FORCES(1)+ ELECTROSTATIC FORCES 0"
+!      WRITE (*, '(3f15.9)') ((f_total(j, i), j=1, 3), i=1, natoms)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
       ! Adding in the reciprocal forces: EWALD is a special case because of distrubted data
       IF (ewald_type == do_ewald_ewald) THEN
@@ -684,12 +796,29 @@ CONTAINS
          END IF
       END IF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST::(2)TOTAL FORCES(1)+ ELECTROSTATIC FORCES"
+!      WRITE (*, '(3f15.9)') ((f_total(j, i), j=1, 3), i=1, natoms)
+      WRITE (*, '(A)') " USE_VIRIAL = "
+      WRITE (*,'(L)') use_virial
+      WRITE (*, '(A)') " EWALD_TYPE = "
+      WRITE (*,'(I0)') ewald_type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!mofificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      pv_nonbond = pv_nonbond*all_forces_scale
+      pv_bc = pv_bc*all_forces_scale
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       IF (use_virial) THEN
+         WRITE (*, '(A)') " use_virial=true "    !!!!!!!!!!!!!!!!!!!MODIFICATED
          ! Add up all the pressure tensors
+
          IF (ewald_type == do_ewald_none) THEN
+            WRITE (*, '(A)') " ewald_type == do_ewald_none "    !!!!!!!!!!!!!!!!!!!MODIFICATED
             virial%pv_virial = pv_nonbond + pv_bond + pv_bend + pv_torsion + pv_imptors + pv_urey_bradley
             CALL mp_sum(virial%pv_virial, para_env%group)
          ELSE
+            WRITE (*, '(A)') " ewald_type /= do_ewald_none "    !!!!!!!!!!!!!!!!!!!MODIFICATED
             ident = 0.0_dp
             DO i = 1, 3
                ident(i, i) = 1.0_dp
@@ -701,6 +830,8 @@ CONTAINS
             virial%pv_virial = virial%pv_virial + ident*thermo%e_neut
             virial%pv_virial = virial%pv_virial + pv_g
          END IF
+      ELSE    !!!!!!!!!!!!!!!!!!!MODIFICATED
+         WRITE (*, '(A)') " use_virial=false "    !!!!!!!!!!!!!!!!!!!MODIFICATED
       END IF
 
       ! Sum total forces
@@ -719,8 +850,11 @@ CONTAINS
          END IF
          DEALLOCATE (ef_f)
       END IF
-
-      ! Assign to particle_set
+	  
+      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 3 (726) is equal to ", thermo%pot
+!      WRITE (*, '(A,f15.9)') " MODIFICATION! thermo%pot at point 3 (726) is equal to ", thermo%pot
+      
+	  ! Assign to particle_set
       SELECT CASE (ewald_type)
       CASE (do_ewald_spme, do_ewald_pme)
          IF (shell_present .AND. shell_model_ad) THEN
@@ -790,6 +924,38 @@ CONTAINS
          END IF
       END SELECT
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!      WRITE (*, '(A)') " FIST::(3)TOTAL FORCES - THE END..."
+!      WRITE (*, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, natoms)
+
+!CALL force_intra_control(molecule_set, molecule_kind_set, &
+!                                  local_molecules, particle_set, shell_particle_set, core_particle_set, &
+!                                  pot_bond, pot_bend, pot_urey_bradley, pot_torsion, pot_imp_torsion, &
+!                                  pot_opbend, pot_shell, pv_bond, pv_bend, pv_urey_bradley, pv_torsion, &
+!                                  pv_imp_torsion, pv_opbend, f_bond, f_bend, f_torsion, f_ub, &
+!                                  f_imptor, f_opbend, cell, use_virial, atprop_env)
+
+
+      WRITE (*, '(A)') "PV_NONBOND"
+      WRITE (*, '(3f15.9)') pv_nonbond
+      WRITE (*, '(A)') "PV_BOND"
+      WRITE (*, '(3f15.9)') pv_bond
+      WRITE (*, '(A)') "PV_G"
+      WRITE (*, '(3f15.9)') pv_g
+      WRITE (*, '(A)') "PV_BEND"
+      WRITE (*, '(3f15.9)') pv_bend
+      WRITE (*, '(A)') "PV_TORSION"
+      WRITE (*, '(3f15.9)') pv_torsion
+      WRITE (*, '(A)') "PV_IMPTORS"
+      WRITE (*, '(3f15.9)') pv_imptors
+      WRITE (*, '(A)') "PV_BC"
+      WRITE (*, '(3f15.9)') pv_bc
+      WRITE (*, '(A)') "PV_OPBEND"
+      WRITE (*, '(3f15.9)') pv_opbend
+      WRITE (*, '(A)') "VIRIAL"
+      WRITE (*, '(3f15.9)') virial%pv_virial
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       IF (iw > 0) THEN
          WRITE (iw, '(A)') " FIST::(3)TOTAL FORCES - THE END..."
          WRITE (iw, '(3f15.9)') ((particle_set(i)%f(j), j=1, 3), i=1, natoms)
@@ -801,6 +967,8 @@ CONTAINS
          END IF
          WRITE (iw, '(A,f15.9)') "Energy after FIST calculation.. exiting now ::", thermo%pot
       END IF
+!      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 4 (810) is equal to ", thermo%pot
+!      WRITE (*, '(A,f15.9)') " MODIFICATION! thermo%pot at point 4 (810) is equal to ", thermo%pot
       !
       ! If we are doing debugging, check if variables are present and assign
       !

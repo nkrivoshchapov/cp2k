@@ -112,6 +112,11 @@ CONTAINS
       inp_info => ff_type%inp_info
       CALL section_vals_val_get(ff_section, "PARMTYPE", i_val=ff_type%ff_type)
       CALL section_vals_val_get(ff_section, "EI_SCALE14", r_val=ff_type%ei_scale14)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!! 
+      CALL section_vals_val_get(ff_section, "FORCE_SCALE", r_val=ff_type%all_forces_scale)
+      CALL section_vals_val_get(ff_section, "ALL_EI_SCALE", r_val=ff_type%all_ei_scale)
+      CALL section_vals_val_get(ff_section, "ALL_VDW_SCALE", r_val=ff_type%all_vdw_scale)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!! 
       CALL section_vals_val_get(ff_section, "VDW_SCALE14", r_val=ff_type%vdw_scale14)
       CALL section_vals_val_get(ff_section, "SPLINE%RCUT_NB", r_val=ff_type%rcut_nb)
       CALL section_vals_val_get(ff_section, "SPLINE%R0_NB", r_val=ff_type%rlow_nb)

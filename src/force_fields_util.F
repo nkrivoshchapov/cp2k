@@ -317,10 +317,13 @@ CONTAINS
       CALL ewald_env_get(ewald_env, rcut=ewald_rcut)
       CALL section_vals_val_get(mm_section, "NEIGHBOR_LISTS%VERLET_SKIN", &
                                 r_val=verlet_skin)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       CALL fist_nonbond_env_create(fist_nonbond_env, atomic_kind_set, &
                                    potparm_nonbond14, potparm_nonbond, ff_type%do_nonbonded, &
-                                   verlet_skin, ewald_rcut, ff_type%ei_scale14, &
-                                   ff_type%vdw_scale14, ff_type%shift_cutoff)
+                                   verlet_skin, ewald_rcut, ff_type%ei_scale14, ff_type%vdw_scale14, &
+                                   ff_type%shift_cutoff, ff_type%all_ei_scale, ff_type%all_vdw_scale, &
+                                   ff_type%all_forces_scale)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       CALL fist_nonbond_env_set(fist_nonbond_env, charges=charges)
       ! Compute the electrostatic interaction cutoffs.
       CALL force_field_pack_eicut(atomic_kind_set, ff_type, potparm_nonbond, &

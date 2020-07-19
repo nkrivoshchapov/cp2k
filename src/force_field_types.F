@@ -185,6 +185,11 @@ MODULE force_field_types
       INTEGER                                   :: ff_type
       REAL(KIND=dp)                             :: rcut_nb
       REAL(KIND=dp)                             :: ei_scale14
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      REAL(KIND=dp)                             :: all_ei_scale
+      REAL(KIND=dp)                             :: all_vdw_scale
+      REAL(KIND=dp)                             :: all_forces_scale
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       REAL(KIND=dp)                             :: vdw_scale14
       REAL(KIND=dp)                             :: eps_spline, &
                                                    max_energy, &
