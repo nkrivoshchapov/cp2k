@@ -300,8 +300,8 @@ CONTAINS
 !> \author fawzi
 ! **************************************************************************************************
    RECURSIVE SUBROUTINE force_env_get(force_env, in_use, fist_env, qs_env, &
-                                      meta_env, fp_env, subsys, para_env, potential_energy, additional_potential, &
-                                      kinetic_energy, harmonic_shell, kinetic_shell, cell, sub_force_env, &
+                                      meta_env, fp_env, subsys, para_env, potential_energy,nonbond_part_potential, &
+                                      additional_potential, kinetic_energy, harmonic_shell, kinetic_shell, cell, sub_force_env, &
                                       qmmm_env, qmmmx_env, eip_env, pwdft_env, globenv, input, force_env_section, &
                                       method_name_id, root_section, mixed_env, embed_env)
       TYPE(force_env_type), POINTER                      :: force_env
@@ -313,7 +313,7 @@ CONTAINS
       TYPE(cp_subsys_type), OPTIONAL, POINTER            :: subsys
       TYPE(cp_para_env_type), OPTIONAL, POINTER          :: para_env
       REAL(KIND=dp), INTENT(OUT), OPTIONAL               :: potential_energy, additional_potential, &
-                                                            kinetic_energy, harmonic_shell, &
+                                                            kinetic_energy, harmonic_shell, nonbond_part_potential, &
                                                             kinetic_shell
       TYPE(cell_type), OPTIONAL, POINTER                 :: cell
       TYPE(force_env_p_type), DIMENSION(:), OPTIONAL, &
@@ -362,6 +362,7 @@ CONTAINS
                            thermo=thermo, &
                            subsys=subsys)
          IF (PRESENT(potential_energy)) potential_energy = thermo%pot
+         IF (PRESENT(nonbond_part_potential)) nonbond_part_potential = thermo%pot_nonbond_part
          IF (PRESENT(kinetic_energy)) kinetic_energy = thermo%kin
          IF (PRESENT(kinetic_shell)) kinetic_shell = thermo%kin_shell
          IF (PRESENT(harmonic_shell)) harmonic_shell = thermo%harm_shell

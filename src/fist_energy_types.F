@@ -20,7 +20,7 @@ MODULE fist_energy_types
 
 ! **************************************************************************************************
    TYPE fist_energy_type
-      REAL(kind=dp) :: kin, pot, e_gspace, e_self, e_neut, e_bonded, e_induction
+      REAL(kind=dp) :: kin, pot, pot_nonbond_part, e_gspace, e_self, e_neut, e_bonded, e_induction
       REAL(kind=dp) :: kin_shell, harm_shell
    END TYPE fist_energy_type
 
@@ -95,6 +95,7 @@ CONTAINS
       IF (ASSOCIATED(fist_energy)) THEN
          fist_energy%kin = 0.0_dp
          fist_energy%pot = 0.0_dp
+         fist_energy%pot_nonbond_part = 0.0_dp
          fist_energy%e_gspace = 0.0_dp
          fist_energy%e_self = 0.0_dp
          fist_energy%e_neut = 0.0_dp

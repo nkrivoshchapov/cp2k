@@ -287,6 +287,9 @@ CONTAINS
       pot_shell = 0.0_dp
       vg_coulomb = 0.0_dp
       thermo%pot = 0.0_dp
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      thermo%pot_nonbond_part = 0.0_dp
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       thermo%harm_shell = 0.0_dp
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -648,22 +651,24 @@ CONTAINS
 
       ! add up all the potential energies
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      thermo%pot_nonbond_part = pot_nonbond
+
       pot_nonbond = pot_nonbond*all_vdw_scale
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       thermo%pot = pot_nonbond + pot_bond + pot_bend + pot_torsion + pot_opbend + &
                    pot_imptors + pot_urey_bradley + pot_manybody + pot_shell
       
-!      WRITE (*, '(A,f15.9)') " ! pot_nonbond = ", pot_nonbond
-!      WRITE (*, '(A,f15.9)') " ! pot_bond =  ", pot_bond
-!      WRITE (*, '(A,f15.9)') " ! pot_bend = ", pot_bend
+      WRITE (*, '(A,f26.20)') " ! pot_nonbond = ", pot_nonbond
+      WRITE (*, '(A,f26.20)') " ! pot_bond =  ", pot_bond
+      WRITE (*, '(A,f26.20)') " ! pot_bend = ", pot_bend
+     
+      WRITE (*, '(A,f26.20)') " ! pot_torsion = ", pot_torsion
+      WRITE (*, '(A,f26.20)') " ! pot_opbend = ", pot_opbend
+      WRITE (*, '(A,f26.20)') " ! pot_imptors = ", pot_imptors
       
-!      WRITE (*, '(A,f15.9)') " ! pot_torsion = ", pot_torsion
-!      WRITE (*, '(A,f15.9)') " ! pot_opbend = ", pot_opbend
-!      WRITE (*, '(A,f15.9)') " ! pot_imptors = ", pot_imptors
-      
-!      WRITE (*, '(A,f15.9)') " ! pot_urey_bradley = ", pot_urey_bradley
-!      WRITE (*, '(A,f15.9)') " ! pot_manybody =  ", pot_manybody
-!      WRITE (*, '(A,f15.9)') " ! pot_shell = ", pot_shell
+      WRITE (*, '(A,f26.20)') " ! pot_urey_bradley = ", pot_urey_bradley
+      WRITE (*, '(A,f26.20)') " ! pot_manybody =  ", pot_manybody
+      WRITE (*, '(A,f26.20)') " ! pot_shell = ", pot_shell
       
 !      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 1 (588) is equal to ", thermo%pot
 !      WRITE (*, '(A,f15.9)') " MODIFICATION! thermo%pot at point 1 (588) is equal to ", thermo%pot
@@ -679,22 +684,23 @@ CONTAINS
          ! e_self, e_neut, and ebonded are already summed over all processors
          ! vg_coulomb is not calculated in parallel
          thermo%e_gspace = vg_coulomb
-!         WRITE (*, '(A,f15.9)') " ! vg_coulomb = ", vg_coulomb
+         WRITE (*, '(A,f15.9)') " ! vg_coulomb = ", vg_coulomb
          
          thermo%pot = thermo%pot + thermo%e_self + thermo%e_neut
-!         WRITE (*, '(A,f15.9)') " ! e_self = ", thermo%e_self
-!         WRITE (*, '(A,f15.9)') " ! e_neut = ", thermo%e_neut
+         WRITE (*, '(A,f15.9)') " ! e_self = ", thermo%e_self
+         WRITE (*, '(A,f15.9)') " ! e_neut = ", thermo%e_neut
          
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         thermo%pot_nonbond_part = thermo%pot + thermo%e_bonded
 
          thermo%e_bonded = thermo%e_bonded*all_ei_scale
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          thermo%pot = thermo%pot + vg_coulomb + thermo%e_bonded
-!         WRITE (*, '(A,f15.9)') " ! e_bonded = ", thermo%e_bonded
+         WRITE (*, '(A,f15.9)') " ! e_bonded = ", thermo%e_bonded
          ! add the induction energy of the dipoles for polarizable models
          IF (do_ipol /= do_fist_pol_none) thermo%pot = thermo%pot + thermo%e_induction
-!         WRITE (*, '(A,f15.9)') " ! e_induction = ", thermo%e_induction
+         WRITE (*, '(A,f15.9)') " ! e_induction = ", thermo%e_induction
       END IF
       
 !      !WRITE (iw, '(A,f15.9)') " MODIFICATION! thermo%pot at point 2 (607) is equal to ", thermo%pot
@@ -936,24 +942,24 @@ CONTAINS
 !                                  f_imptor, f_opbend, cell, use_virial, atprop_env)
 
 
-      WRITE (*, '(A)') "PV_NONBOND"
-      WRITE (*, '(3f15.9)') pv_nonbond
-      WRITE (*, '(A)') "PV_BOND"
-      WRITE (*, '(3f15.9)') pv_bond
-      WRITE (*, '(A)') "PV_G"
-      WRITE (*, '(3f15.9)') pv_g
-      WRITE (*, '(A)') "PV_BEND"
-      WRITE (*, '(3f15.9)') pv_bend
-      WRITE (*, '(A)') "PV_TORSION"
-      WRITE (*, '(3f15.9)') pv_torsion
-      WRITE (*, '(A)') "PV_IMPTORS"
-      WRITE (*, '(3f15.9)') pv_imptors
-      WRITE (*, '(A)') "PV_BC"
-      WRITE (*, '(3f15.9)') pv_bc
-      WRITE (*, '(A)') "PV_OPBEND"
-      WRITE (*, '(3f15.9)') pv_opbend
-      WRITE (*, '(A)') "VIRIAL"
-      WRITE (*, '(3f15.9)') virial%pv_virial
+!      WRITE (*, '(A)') "PV_NONBOND"
+!      WRITE (*, '(3f15.9)') pv_nonbond
+!      WRITE (*, '(A)') "PV_BOND"
+!      WRITE (*, '(3f15.9)') pv_bond
+!      WRITE (*, '(A)') "PV_G"
+!      WRITE (*, '(3f15.9)') pv_g
+!      WRITE (*, '(A)') "PV_BEND"
+!      WRITE (*, '(3f15.9)') pv_bend
+!      WRITE (*, '(A)') "PV_TORSION"
+!      WRITE (*, '(3f15.9)') pv_torsion
+!      WRITE (*, '(A)') "PV_IMPTORS"
+!      WRITE (*, '(3f15.9)') pv_imptors
+!      WRITE (*, '(A)') "PV_BC"
+!      WRITE (*, '(3f15.9)') pv_bc
+!      WRITE (*, '(A)') "PV_OPBEND"
+!      WRITE (*, '(3f15.9)') pv_opbend
+!      WRITE (*, '(A)') "VIRIAL"
+!      WRITE (*, '(3f15.9)') virial%pv_virial
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!modificated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IF (iw > 0) THEN
