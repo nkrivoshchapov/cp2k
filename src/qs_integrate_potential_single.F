@@ -1,6 +1,8 @@
 !--------------------------------------------------------------------------------------------------!
 !   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright (C) 2000 - 2020  CP2K developers group                                               !
+!   Copyright 2000-2020 CP2K developers group <https://cp2k.org>                                   !
+!                                                                                                  !
+!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
@@ -44,8 +46,7 @@ MODULE qs_integrate_potential_single
    USE gaussian_gridlevels,             ONLY: gaussian_gridlevel,&
                                               gridlevel_info_type
    USE grid_api,                        ONLY: integrate_pgf_product
-   USE kinds,                           ONLY: dp,&
-                                              int_8
+   USE kinds,                           ONLY: dp
    USE lri_environment_types,           ONLY: lri_kind_type
    USE memory_utilities,                ONLY: reallocate
    USE message_passing,                 ONLY: mp_sum
@@ -100,8 +101,7 @@ CONTAINS
       TYPE(pw_p_type), INTENT(INOUT)                     :: rho_rspace
       TYPE(qs_environment_type), POINTER                 :: qs_env
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_ppl_rspace', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_ppl_rspace'
 
       INTEGER                                            :: atom_a, handle, iatom, ikind, j, lppl, &
                                                             n, natom_of_kind, ni, npme
@@ -256,7 +256,7 @@ CONTAINS
                                        radius=radius, &
                                        calculate_forces=.TRUE., force_a=force_a, &
                                        force_b=force_b, use_virial=use_virial, my_virial_a=my_virial_a, &
-                                       my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+                                       my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0)
 
             force(ikind)%gth_ppl(:, iatom) = &
                force(ikind)%gth_ppl(:, iatom) + force_a(:)*rho_rspace%pw%pw_grid%dvol
@@ -289,8 +289,7 @@ CONTAINS
       TYPE(pw_p_type), INTENT(INOUT)                     :: rho_rspace
       TYPE(qs_environment_type), POINTER                 :: qs_env
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_rho_nlcc', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_rho_nlcc'
 
       INTEGER                                            :: atom_a, handle, iatom, iexp_nlcc, ikind, &
                                                             ithread, j, n, natom, nc, nexp_nlcc, &
@@ -457,7 +456,7 @@ CONTAINS
                                           radius=radius, &
                                           calculate_forces=.TRUE., force_a=force_a, &
                                           force_b=force_b, use_virial=use_virial, my_virial_a=my_virial_a, &
-                                          my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+                                          my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0)
 
                force(ikind)%gth_nlcc(:, iatom) = &
                   force(ikind)%gth_nlcc(:, iatom) + force_a(:)*rho_rspace%pw%pw_grid%dvol
@@ -492,8 +491,7 @@ CONTAINS
       TYPE(pw_p_type), INTENT(INOUT)                     :: v_rspace
       TYPE(qs_environment_type), POINTER                 :: qs_env
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_core_rspace', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_core_rspace'
 
       INTEGER                                            :: atom_a, handle, iatom, ikind, j, natom, &
                                                             natom_of_kind, npme
@@ -615,7 +613,7 @@ CONTAINS
                                           radius=radius, &
                                           calculate_forces=.TRUE., force_a=force_a, &
                                           force_b=force_b, use_virial=use_virial, my_virial_a=my_virial_a, &
-                                          my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+                                          my_virial_b=my_virial_b, use_subpatch=.TRUE., subpatch_pattern=0)
 
                IF (ASSOCIATED(force)) THEN
                   force(ikind)%rho_core(:, iatom) = force(ikind)%rho_core(:, iatom) + force_a(:)
@@ -662,8 +660,7 @@ CONTAINS
       CHARACTER(len=*), INTENT(IN)                       :: basis_type
       INTEGER, DIMENSION(:), OPTIONAL                    :: atomlist
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_rspace_one_center', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_rspace_one_center'
 
       INTEGER :: atom_a, dir, group_size, handle, i, iatom, igrid_level, ikind, ipgf, iset, m1, &
          maxco, maxsgf_set, my_pos, na1, natom_of_kind, ncoa, nkind, nseta, offset, sgfa
@@ -902,8 +899,7 @@ CONTAINS
       LOGICAL, INTENT(IN)                                :: calculate_forces
       CHARACTER(len=*), INTENT(IN)                       :: basis_type
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_rspace_diagonal', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'integrate_v_rspace_diagonal'
 
       INTEGER :: atom_a, dir, group_size, handle, i, iatom, igrid_level, ikind, ipgf, iset, jpgf, &
          jset, m1, maxco, maxsgf_set, my_pos, na1, na2, natom_of_kind, nb1, nb2, ncoa, ncob, &

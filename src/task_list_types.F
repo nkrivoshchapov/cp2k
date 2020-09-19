@@ -1,6 +1,8 @@
 !--------------------------------------------------------------------------------------------------!
 !   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright (C) 2000 - 2020  CP2K developers group                                               !
+!   Copyright 2000-2020 CP2K developers group <https://cp2k.org>                                   !
+!                                                                                                  !
+!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
@@ -11,6 +13,10 @@
 ! **************************************************************************************************
 MODULE task_list_types
 
+   USE grid_api,                        ONLY: grid_basis_set_type,&
+                                              grid_free_basis_set,&
+                                              grid_free_task_list,&
+                                              grid_task_list_type
    USE kinds,                           ONLY: dp,&
                                               int_8
 #include "./base/base_uses.f90"
@@ -22,12 +28,11 @@ MODULE task_list_types
    CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'task_list_types'
 
    TYPE task_type
-      INTEGER(kind=int_8)                           :: destination = 0
-      INTEGER(kind=int_8)                           :: source = 0
-      INTEGER(kind=int_8)                           :: dist_type = 0
-      INTEGER(kind=int_8)                           :: cost = 0
-      INTEGER(kind=int_8)                           :: subpatch_pattern = 0
-
+      INTEGER                                       :: destination = 0
+      INTEGER                                       :: source = 0
+      INTEGER                                       :: dist_type = 0
+      INTEGER                                       :: cost = 0
+      INTEGER                                       :: subpatch_pattern = 0
       INTEGER                                       :: grid_level = 0
       INTEGER                                       :: image = 0
       INTEGER                                       :: iatom = 0
@@ -51,11 +56,26 @@ MODULE task_list_types
 
    TYPE task_list_type
       TYPE(task_type), DIMENSION(:), POINTER        :: tasks => Null()
-      TYPE(atom_pair_type), DIMENSION(:), POINTER   :: atom_pair_send => Null()
-      TYPE(atom_pair_type), DIMENSION(:), POINTER   :: atom_pair_recv => Null()
       INTEGER                                       :: ntasks
       INTEGER, DIMENSION(:, :), POINTER             :: taskstart, taskstop
       INTEGER, DIMENSION(:), POINTER                :: npairs
+
+      TYPE(atom_pair_type), DIMENSION(:), POINTER   :: atom_pair_send => Null()
+      INTEGER, DIMENSION(:), POINTER                :: pair_offsets_send => Null()
+      INTEGER, DIMENSION(:), POINTER                :: rank_offsets_send => Null()
+      INTEGER, DIMENSION(:), POINTER                :: rank_sizes_send => Null()
+      INTEGER                                       :: buffer_size_send = 0
+
+      TYPE(atom_pair_type), DIMENSION(:), POINTER   :: atom_pair_recv => Null()
+      INTEGER, DIMENSION(:), POINTER                :: pair_offsets_recv => Null()
+      INTEGER, DIMENSION(:), POINTER                :: rank_offsets_recv => Null()
+      INTEGER, DIMENSION(:), POINTER                :: rank_sizes_recv => Null()
+      INTEGER                                       :: buffer_size_recv = 0
+
+      REAL(KIND=dp), DIMENSION(:), POINTER          :: buffer_recv => Null()
+
+      TYPE(grid_basis_set_type), DIMENSION(:), POINTER :: grid_basis_sets => Null()
+      TYPE(grid_task_list_type)                     :: grid_task_list
    END TYPE task_list_type
 
    INTEGER, PARAMETER                               :: task_size_in_int8 = 17
@@ -74,9 +94,6 @@ CONTAINS
 ! **************************************************************************************************
    SUBROUTINE allocate_task_list(task_list)
       TYPE(task_list_type), POINTER                      :: task_list
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'allocate_task_list', &
-         routineP = moduleN//':'//routineN
 
       ALLOCATE (task_list)
 
@@ -126,17 +143,10 @@ CONTAINS
    SUBROUTINE deallocate_task_list(task_list)
       TYPE(task_list_type), POINTER                      :: task_list
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'deallocate_task_list', &
-         routineP = moduleN//':'//routineN
+      INTEGER                                            :: i
 
       IF (ASSOCIATED(task_list%tasks)) THEN
          DEALLOCATE (task_list%tasks)
-      ENDIF
-      IF (ASSOCIATED(task_list%atom_pair_send)) THEN
-         DEALLOCATE (task_list%atom_pair_send)
-      ENDIF
-      IF (ASSOCIATED(task_list%atom_pair_recv)) THEN
-         DEALLOCATE (task_list%atom_pair_recv)
       ENDIF
       IF (ASSOCIATED(task_list%taskstart)) THEN
          DEALLOCATE (task_list%taskstart)
@@ -146,6 +156,40 @@ CONTAINS
       ENDIF
       IF (ASSOCIATED(task_list%npairs)) THEN
          DEALLOCATE (task_list%npairs)
+      ENDIF
+
+      IF (ASSOCIATED(task_list%atom_pair_send)) THEN
+         DEALLOCATE (task_list%atom_pair_send)
+      ENDIF
+      IF (ASSOCIATED(task_list%pair_offsets_send)) THEN
+         DEALLOCATE (task_list%pair_offsets_send)
+      ENDIF
+      IF (ASSOCIATED(task_list%rank_offsets_send)) THEN
+         DEALLOCATE (task_list%rank_offsets_send)
+      ENDIF
+      IF (ASSOCIATED(task_list%rank_sizes_send)) THEN
+         DEALLOCATE (task_list%rank_sizes_send)
+      ENDIF
+
+      IF (ASSOCIATED(task_list%atom_pair_recv)) THEN
+         DEALLOCATE (task_list%atom_pair_recv)
+      ENDIF
+      IF (ASSOCIATED(task_list%pair_offsets_recv)) THEN
+         DEALLOCATE (task_list%pair_offsets_recv)
+      ENDIF
+      IF (ASSOCIATED(task_list%rank_offsets_recv)) THEN
+         DEALLOCATE (task_list%rank_offsets_recv)
+      ENDIF
+      IF (ASSOCIATED(task_list%rank_sizes_recv)) THEN
+         DEALLOCATE (task_list%rank_sizes_recv)
+      ENDIF
+      CALL grid_free_task_list(task_list%grid_task_list)  ! also frees task_list%buffer_recv
+      NULLIFY (task_list%buffer_recv)
+      IF (ASSOCIATED(task_list%grid_basis_sets)) THEN
+         DO i = 1, SIZE(task_list%grid_basis_sets)
+            CALL grid_free_basis_set(task_list%grid_basis_sets(i))
+         ENDDO
+         DEALLOCATE (task_list%grid_basis_sets)
       ENDIF
 
       DEALLOCATE (task_list)
@@ -194,11 +238,11 @@ CONTAINS
       INTEGER(KIND=int_8), &
          DIMENSION(task_size_in_int8), INTENT(IN)        :: serialized_task
 
-      task%destination = serialized_task(1)
-      task%source = serialized_task(2)
-      task%dist_type = serialized_task(3)
-      task%cost = serialized_task(4)
-      task%subpatch_pattern = serialized_task(5)
+      task%destination = INT(serialized_task(1))
+      task%source = INT(serialized_task(2))
+      task%dist_type = INT(serialized_task(3))
+      task%cost = INT(serialized_task(4))
+      task%subpatch_pattern = INT(serialized_task(5))
 
       task%grid_level = INT(serialized_task(6))
       task%image = INT(serialized_task(7))

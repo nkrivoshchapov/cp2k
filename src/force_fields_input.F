@@ -1,6 +1,8 @@
 !--------------------------------------------------------------------------------------------------!
 !   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright (C) 2000 - 2020  CP2K developers group                                               !
+!   Copyright 2000-2020 CP2K developers group <https://cp2k.org>                                   !
+!                                                                                                  !
+!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
@@ -95,9 +97,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: ff_section, mm_section
       TYPE(force_field_type), INTENT(INOUT)              :: ff_type
       TYPE(cp_para_env_type), POINTER                    :: para_env
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_force_field_section1', &
-         routineP = moduleN//':'//routineN
 
       INTEGER :: nb4, nbends, nbm, nbmhft, nbmhftd, nbonds, nchg, neam, ngal, ngd, ngp, nimpr, &
          nipbv, nlj, nopbend, nquip, nshell, nsiepmann, ntersoff, ntors, ntot, nubs, nwl
@@ -466,8 +465,6 @@ CONTAINS
       CHARACTER(LEN=*), INTENT(IN)                       :: at1, at2
       TYPE(ipbv_pot_type), POINTER                       :: ipbv
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'set_IPBV_ff', routineP = moduleN//':'//routineN
-
       IF ((at1(1:1) == 'O') .AND. (at2(1:1) == 'O')) THEN
          ipbv%rcore = 0.9_dp ! a.u.
          ipbv%m = -1.2226442563398141E+11_dp ! Kelvin/a.u.
@@ -544,8 +541,6 @@ CONTAINS
       CHARACTER(LEN=*), INTENT(IN)                       :: at1, at2
       TYPE(ft_pot_type), POINTER                         :: ft
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'set_BMHFT_ff', routineP = moduleN//':'//routineN
-
       ft%b = cp_unit_to_cp2k(3.1545_dp, "angstrom^-1")
       IF ((at1(1:2) == 'NA') .AND. (at2(1:2) == 'NA')) THEN
          ft%a = cp_unit_to_cp2k(424.097_dp, "eV")
@@ -572,8 +567,6 @@ CONTAINS
 ! **************************************************************************************************
    SUBROUTINE set_BMHFTD_ff()
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'set_BMHFTD_ff', routineP = moduleN//':'//routineN
-
       CPABORT("No default parameters present for BMHFTD")
 
    END SUBROUTINE set_BMHFTD_ff
@@ -593,9 +586,6 @@ CONTAINS
       INTEGER, INTENT(IN)                                :: start
       TYPE(cp_para_env_type), POINTER                    :: para_env
       TYPE(section_vals_type), POINTER                   :: mm_section
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_eam_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -628,9 +618,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_quip_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: args_str, atm_names
@@ -682,9 +669,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_lj_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items, n_rep
@@ -727,9 +711,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_wl_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -774,9 +755,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_gd_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -826,9 +804,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_ipbv_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items, n_rep
@@ -867,9 +842,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_bmhft_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), DIMENSION(2) :: map_atoms
       CHARACTER(LEN=default_string_length), &
@@ -928,9 +900,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_bmhftd_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), DIMENSION(2) :: map_atoms
       CHARACTER(LEN=default_string_length), &
@@ -995,9 +964,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_b4_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1186,9 +1152,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_gp_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items, n_rep
@@ -1234,9 +1197,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
       TYPE(section_vals_type), POINTER                   :: tersoff_section
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_tersoff_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1308,9 +1268,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
       TYPE(section_vals_type), POINTER                   :: gal_section
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_gal_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1402,9 +1359,6 @@ CONTAINS
       INTEGER, INTENT(IN)                                :: start
       TYPE(section_vals_type), POINTER                   :: siepmann_section
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_siepmann_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items, n_rep
@@ -1459,9 +1413,6 @@ CONTAINS
       TYPE(pair_potential_p_type), POINTER               :: nonbonded
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_bm_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1523,9 +1474,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_chrg_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length)               :: atm_name
       INTEGER                                            :: isec, n_items
 
@@ -1555,9 +1503,6 @@ CONTAINS
       TYPE(damping_info_type), DIMENSION(:), POINTER     :: damping_list
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_apol_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length)               :: atm_name
       INTEGER                                            :: isec, isec_damp, n_damp, n_items, &
@@ -1630,9 +1575,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_cpol_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length)               :: atm_name
       INTEGER                                            :: isec, n_items
 
@@ -1657,9 +1599,6 @@ CONTAINS
       TYPE(shell_p_type), DIMENSION(:), POINTER          :: shell_list
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_shell_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length)               :: atm_name
       INTEGER                                            :: i_rep, n_rep
@@ -1722,9 +1661,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_bonds_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, k, n_items
@@ -1781,9 +1717,6 @@ CONTAINS
       TYPE(legendre_data_type), DIMENSION(:), POINTER    :: bend_legendre
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_bends_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1846,9 +1779,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_ubs_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, k, n_items
@@ -1905,9 +1835,6 @@ CONTAINS
       INTEGER, DIMENSION(:), POINTER                     :: torsion_m
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_torsions_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -1967,9 +1894,6 @@ CONTAINS
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_improper_section', &
-         routineP = moduleN//':'//routineN
-
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items
@@ -2013,9 +1937,6 @@ CONTAINS
       REAL(KIND=dp), DIMENSION(:), POINTER               :: opbend_k, opbend_phi0
       TYPE(section_vals_type), POINTER                   :: section
       INTEGER, INTENT(IN)                                :: start
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_opbend_section', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
@@ -2072,7 +1993,7 @@ CONTAINS
       TYPE(cp_para_env_type), POINTER                    :: para_env
       TYPE(section_vals_type), POINTER                   :: mm_section
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_eam_data', routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER                        :: routineN = 'read_eam_data'
 
       INTEGER                                            :: handle, i, iw
       TYPE(cp_logger_type), POINTER                      :: logger

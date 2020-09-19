@@ -1,6 +1,8 @@
 !--------------------------------------------------------------------------------------------------!
 !   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright (C) 2000 - 2020  CP2K developers group                                               !
+!   Copyright 2000-2020 CP2K developers group <https://cp2k.org>                                   !
+!                                                                                                  !
+!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
@@ -45,8 +47,7 @@ MODULE qs_cdft_utils
                                               section_vals_type,&
                                               section_vals_val_get
    USE kinds,                           ONLY: default_path_length,&
-                                              dp,&
-                                              int_8
+                                              dp
    USE memory_utilities,                ONLY: reallocate
    USE outer_scf_control_types,         ONLY: outer_scf_read_parameters
    USE particle_list_types,             ONLY: particle_list_type
@@ -99,8 +100,7 @@ CONTAINS
    SUBROUTINE becke_constraint_init(qs_env)
       TYPE(qs_environment_type), POINTER                 :: qs_env
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'becke_constraint_init', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'becke_constraint_init'
 
       CHARACTER(len=2)                                   :: element_symbol
       INTEGER :: atom_a, bounds(2), handle, i, iatom, iex, igroup, ikind, ip, ithread, iw, j, &
@@ -386,7 +386,7 @@ CONTAINS
                                                 (/0.0_dp, 0.0_dp, 0.0_dp/), 1.0_dp, &
                                                 pab, 0, 0, rs_cavity, cell, pw_env%cube_info(1), &
                                                 radius=radius, ga_gb_function=GRID_FUNC_AB, &
-                                                use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+                                                use_subpatch=.TRUE., subpatch_pattern=0)
                   ENDIF
                END DO
             END DO
@@ -462,9 +462,6 @@ CONTAINS
       TYPE(cdft_control_type), INTENT(INOUT)             :: cdft_control
       TYPE(section_vals_type), POINTER                   :: becke_section
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_becke_section', &
-         routineP = moduleN//':'//routineN
-
       INTEGER                                            :: j
       LOGICAL                                            :: exists
       REAL(KIND=dp), DIMENSION(:), POINTER               :: rtmplist
@@ -538,9 +535,6 @@ CONTAINS
 
       TYPE(cdft_control_type), INTENT(INOUT)             :: cdft_control
       TYPE(section_vals_type), INTENT(INOUT), POINTER    :: cdft_control_section
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_constraint_definitions', &
-         routineP = moduleN//':'//routineN
 
       INTEGER                                            :: i, j, jj, k, n_rep, natoms, nvar, &
                                                             tot_natoms
@@ -732,9 +726,6 @@ CONTAINS
       TYPE(qs_control_type), INTENT(INOUT)               :: qs_control
       TYPE(section_vals_type), POINTER                   :: cdft_control_section
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_cdft_control_section', &
-         routineP = moduleN//':'//routineN
-
       LOGICAL                                            :: exists
       TYPE(cdft_control_type), POINTER                   :: cdft_control
       TYPE(section_vals_type), POINTER                   :: becke_constraint_section, &
@@ -811,9 +802,6 @@ CONTAINS
       TYPE(cdft_control_type), INTENT(INOUT)             :: cdft_control
       TYPE(section_vals_type), POINTER                   :: hirshfeld_section
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'read_hirshfeld_constraint_section', &
-         routineP = moduleN//':'//routineN
-
       LOGICAL                                            :: exists
       REAL(KIND=dp), DIMENSION(:), POINTER               :: rtmplist
       TYPE(hirshfeld_constraint_type), POINTER           :: hirshfeld_control
@@ -861,7 +849,6 @@ CONTAINS
       REAL(KIND=dp), DIMENSION(:, :, :), INTENT(IN)      :: fun1, fun2
       LOGICAL, INTENT(IN)                                :: divide
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'hfun_scale', routineP = moduleN//':'//routineN
       REAL(KIND=dp), PARAMETER                           :: small = 1.0e-12_dp
 
       INTEGER                                            :: i1, i2, i3, n1, n2, n3
@@ -913,8 +900,6 @@ CONTAINS
       REAL(KIND=dp), INTENT(IN)                          :: th
       LOGICAL                                            :: just_bounds
       INTEGER, OPTIONAL                                  :: bounds(2)
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'hfun_zero', routineP = moduleN//':'//routineN
 
       INTEGER                                            :: i1, i2, i3, lb, n1, n2, n3, nzeroed, &
                                                             nzeroed_inner, ub
@@ -981,8 +966,7 @@ CONTAINS
    SUBROUTINE hirshfeld_constraint_init(qs_env)
       TYPE(qs_environment_type), POINTER                 :: qs_env
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'hirshfeld_constraint_init', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'hirshfeld_constraint_init'
 
       CHARACTER(len=2)                                   :: element_symbol
       INTEGER                                            :: handle, iat, iatom, igroup, ikind, ip, &
@@ -1111,9 +1095,6 @@ CONTAINS
    SUBROUTINE cdft_constraint_print(qs_env, electronic_charge)
       TYPE(qs_environment_type), POINTER                 :: qs_env
       REAL(kind=dp), ALLOCATABLE, DIMENSION(:, :)        :: electronic_charge
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'cdft_constraint_print', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(len=2)                                   :: element_symbol
       INTEGER                                            :: iatom, ikind, iw, jatom
@@ -1275,9 +1256,6 @@ CONTAINS
 ! **************************************************************************************************
    SUBROUTINE cdft_print_weight_function(qs_env)
       TYPE(qs_environment_type), POINTER                 :: qs_env
-
-      CHARACTER(len=*), PARAMETER :: routineN = 'cdft_print_weight_function', &
-         routineP = moduleN//':'//routineN
 
       CHARACTER(LEN=default_path_length)                 :: middle_name
       INTEGER                                            :: igroup, unit_nr

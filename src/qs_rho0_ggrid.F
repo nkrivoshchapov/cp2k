@@ -1,6 +1,8 @@
 !--------------------------------------------------------------------------------------------------!
 !   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright (C) 2000 - 2020  CP2K developers group                                               !
+!   Copyright 2000-2020 CP2K developers group <https://cp2k.org>                                   !
+!                                                                                                  !
+!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
 !--------------------------------------------------------------------------------------------------!
 ! **************************************************************************************************
 MODULE qs_rho0_ggrid
@@ -16,8 +18,7 @@ MODULE qs_rho0_ggrid
    USE gaussian_gridlevels,             ONLY: gaussian_gridlevel
    USE grid_api,                        ONLY: GRID_FUNC_AB,&
                                               collocate_pgf_product
-   USE kinds,                           ONLY: dp,&
-                                              int_8
+   USE kinds,                           ONLY: dp
    USE mathconstants,                   ONLY: dfac,&
                                               fourpi
    USE memory_utilities,                ONLY: reallocate
@@ -95,8 +96,7 @@ CONTAINS
       TYPE(rho0_mpole_type), POINTER                     :: rho0
       REAL(dp), INTENT(OUT)                              :: tot_rs_int
 
-      CHARACTER(LEN=*), PARAMETER :: routineN = 'put_rho0_on_grid', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(LEN=*), PARAMETER                        :: routineN = 'put_rho0_on_grid'
 
       INTEGER                                            :: auxbas_grid, handle, iat, iatom, igrid, &
                                                             ikind, ithread, j, l0_ikind, lmax0, &
@@ -224,7 +224,7 @@ CONTAINS
                l0_ikind, zet0, 0, 0, 0.0_dp, 0, &
                ra, (/0.0_dp, 0.0_dp, 0.0_dp/), 1.0_dp, pab, 0, 0, &
                rs_grid, cell, cube_info(igrid), ga_gb_function=GRID_FUNC_AB, radius=rpgf0, &
-               use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+               use_subpatch=.TRUE., subpatch_pattern=0)
 
          END DO !  j
 
@@ -280,8 +280,7 @@ CONTAINS
       TYPE(pw_env_type), POINTER                         :: pw_env
       TYPE(rho0_mpole_type), POINTER                     :: rho0_mpole
 
-      CHARACTER(len=*), PARAMETER :: routineN = 'rho0_s_grid_create', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(len=*), PARAMETER :: routineN = 'rho0_s_grid_create'
 
       INTEGER                                            :: handle
       TYPE(pw_p_type), POINTER                           :: rho_gs, rho_rs
@@ -345,8 +344,7 @@ CONTAINS
       LOGICAL, INTENT(IN)                                :: calculate_forces
       TYPE(local_rho_type), OPTIONAL, POINTER            :: local_rho_set
 
-      CHARACTER(LEN=*), PARAMETER :: routineN = 'integrate_vhg0_rspace', &
-         routineP = moduleN//':'//routineN
+      CHARACTER(LEN=*), PARAMETER :: routineN = 'integrate_vhg0_rspace'
 
       INTEGER :: auxbas_grid, bo(2), handle, i, iat, iatom, ic, icg, ico, ig1, ig2, igrid, ii, &
          ikind, ipgf1, ipgf2, is, iset1, iset2, iso, iso1, iso2, ispin, j, l0_ikind, llmax, lmax0, &
@@ -578,7 +576,7 @@ CONTAINS
                   calculate_forces=calculate_forces, &
                   hdab=hdab, hadb=hadb, &
                   use_virial=use_virial, my_virial_a=my_virial_a, my_virial_b=my_virial_b, &
-                  a_hdab=a_hdab, use_subpatch=.TRUE., subpatch_pattern=0_int_8)
+                  a_hdab=a_hdab, use_subpatch=.TRUE., subpatch_pattern=0)
 
                ! Convert from cartesian to spherical
                DO lshell = 0, l0_ikind
