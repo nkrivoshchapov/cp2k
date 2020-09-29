@@ -58,10 +58,20 @@ CONTAINS
          ! An upper boundary for the potential definition was defined
          IF ((pot%set(j)%rmax /= not_initialized) .AND. (r >= pot%set(j)%rmax)) CYCLE
          ! If within limits let's compute the potential...
+
+!!!		default potential | new variable("softness parameter") = lambda 
+
          IF (pot%type(j) == lj_charmm_type) THEN
             lvalue = &
                4.0_dp*pot%set(j)%lj%epsilon*(pot%set(j)%lj%sigma12*r**(-12) - pot%set(j)%lj% &
                                              sigma6*r**(-6))
+
+!               4.0_dp*pot%set(j)%lj%epsilon*(pot%set(j)%lj%sigma12*(r**6 + pot%set(j)%lj% &
+!                                             lambda**2*pot%set(j)%lj%sigma12/pot%set(j)% &
+!                                             lj%sigma6)**(-2) - pot%set(j)%lj%sigma6* &
+!                                             (r + pot%set(j)%lj%lambda**2*pot%set(j)% &
+!                                             lj%sigma12/pot%set(j)%lj%sigma6)**(-6))
+!!!
          ELSE IF (pot%type(j) == lj_type) THEN
             lvalue = pot%set(j)%lj%epsilon* &
                      (pot%set(j)%lj%sigma12*r**(-12) - pot%set(j)%lj%sigma6*r**(-6))

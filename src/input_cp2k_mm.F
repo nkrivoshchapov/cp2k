@@ -1509,6 +1509,14 @@ CONTAINS
                           unit_str="angstrom")
       CALL section_add_keyword(section, keyword)
       CALL keyword_release(keyword)
+!!!!!!!!!!!
+      CALL keyword_create(keyword, __LOCATION__, name="LAMBDA", &
+                          description="For soft-core potential based on L-J", &
+                          usage="LAMBDA {real}", default_r_val=0.0_dp, &
+                          unit_str="angstrom")
+      CALL section_add_keyword(section, keyword)
+      CALL keyword_release(keyword)
+!!!!!!!!!!!
 
       CALL keyword_create(keyword, __LOCATION__, name="RMIN", &
                           description="Defines the lower bound of the potential. If not set the range is the"// &

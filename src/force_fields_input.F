@@ -672,7 +672,7 @@ CONTAINS
       CHARACTER(LEN=default_string_length), &
          DIMENSION(:), POINTER                           :: atm_names
       INTEGER                                            :: isec, n_items, n_rep
-      REAL(KIND=dp)                                      :: epsilon, rcut, sigma
+      REAL(KIND=dp)                                      :: epsilon, rcut, sigma, lambda
 
       CALL section_vals_get(section, n_repetition=n_items)
       DO isec = 1, n_items
@@ -680,7 +680,7 @@ CONTAINS
          CALL section_vals_val_get(section, "EPSILON", i_rep_section=isec, r_val=epsilon)
          CALL section_vals_val_get(section, "SIGMA", i_rep_section=isec, r_val=sigma)
          CALL section_vals_val_get(section, "RCUT", i_rep_section=isec, r_val=rcut)
-
+         CALL section_vals_val_get(section, "LAMBDA", i_rep_section=isec, r_val=lambda)
          nonbonded%pot(start + isec)%pot%type = lj_charmm_type
          nonbonded%pot(start + isec)%pot%at1 = atm_names(1)
          nonbonded%pot(start + isec)%pot%at2 = atm_names(2)
@@ -689,6 +689,7 @@ CONTAINS
          nonbonded%pot(start + isec)%pot%set(1)%lj%epsilon = epsilon
          nonbonded%pot(start + isec)%pot%set(1)%lj%sigma6 = sigma**6
          nonbonded%pot(start + isec)%pot%set(1)%lj%sigma12 = sigma**12
+         nonbonded%pot(start + isec)%pot%set(1)%lj%lambda = lambda
          nonbonded%pot(start + isec)%pot%rcutsq = rcut*rcut
          !
          CALL section_vals_val_get(section, "RMIN", i_rep_section=isec, n_rep_val=n_rep)

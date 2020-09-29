@@ -67,7 +67,8 @@ MODULE force_fields_util
         set_molecule_kind, torsion_type, ub_type
    USE molecule_types,                  ONLY: get_molecule,&
                                               molecule_type
-   USE pair_potential_types,            ONLY: pair_potential_pp_type
+   USE pair_potential_types,            ONLY: pair_potential_pp_type, &
+                                              pair_potential_single_type
    USE particle_types,                  ONLY: particle_type
    USE qmmm_types_low,                  ONLY: qmmm_env_mm_type
    USE shell_potential_types,           ONLY: shell_kind_type
@@ -139,6 +140,7 @@ CONTAINS
       TYPE(input_info_type), POINTER                     :: inp_info
       TYPE(pair_potential_pp_type), POINTER              :: potparm_nonbond, potparm_nonbond14
       TYPE(section_vals_type), POINTER                   :: charges_section
+      TYPE(pair_potential_single_type), POINTER          :: pot
 
       CALL timeset(routineN, handle)
       fatal = .FALSE.
@@ -328,7 +330,7 @@ CONTAINS
       CALL fist_nonbond_env_set(fist_nonbond_env, charges=charges)
       ! Compute the electrostatic interaction cutoffs.
       CALL force_field_pack_eicut(atomic_kind_set, ff_type, potparm_nonbond, &
-                                  ewald_env)
+                                  ewald_env, pot)
 
       CALL cp_print_key_finished_output(iw4, logger, mm_section, "PRINT%PROGRAM_RUN_INFO")
       CALL cp_print_key_finished_output(iw3, logger, mm_section, "PRINT%FF_INFO/SPLINE_DATA")

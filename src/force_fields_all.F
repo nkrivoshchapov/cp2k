@@ -3194,12 +3194,13 @@ CONTAINS
 !> \author Toon.Verstraelen@gmail.com
 ! **************************************************************************************************
    SUBROUTINE force_field_pack_eicut(atomic_kind_set, ff_type, &
-                                     potparm_nonbond, ewald_env)
+                                     potparm_nonbond, ewald_env, pot1)
 
       TYPE(atomic_kind_type), DIMENSION(:), POINTER      :: atomic_kind_set
       TYPE(force_field_type), INTENT(IN)                 :: ff_type
       TYPE(pair_potential_pp_type), POINTER              :: potparm_nonbond
       TYPE(ewald_environment_type), POINTER              :: ewald_env
+      TYPE(pair_potential_single_type), POINTER          :: pot1
 
       CHARACTER(len=*), PARAMETER :: routineN = 'force_field_pack_eicut'
 
@@ -3235,7 +3236,7 @@ CONTAINS
                   atomic_kind => atomic_kind_set(i2)
                   CALL get_atomic_kind(atomic_kind=atomic_kind, mm_radius=mm_radius2)
                   ! cutoff for core-core
-                  interaction_cutoffs(1, i1, i2) = potential_coulomb(rcut2, tmp, &
+                  interaction_cutoffs(1, i1, i2) = potential_coulomb(pot1, rcut2, tmp, &
                                                                      1.0_dp, ewald_type, alpha, 0.0_dp, 0.0_dp)
                   ! cutoff for core-shell, core-ion, shell-core or ion-core
                   IF (mm_radius1 > 0.0_dp) THEN
@@ -3243,7 +3244,7 @@ CONTAINS
                   ELSE
                      beta = 0.0_dp
                   END IF
-                  interaction_cutoffs(2, i1, i2) = potential_coulomb(rcut2, tmp, &
+                  interaction_cutoffs(2, i1, i2) = potential_coulomb(pot1, rcut2, tmp, &
                                                                      1.0_dp, ewald_type, alpha, beta, 0.0_dp)
                   ! cutoff for shell-shell or ion-ion
                   IF (mm_radius1 + mm_radius2 > 0.0_dp) THEN
@@ -3251,7 +3252,7 @@ CONTAINS
                   ELSE
                      beta = 0.0_dp
                   END IF
-                  interaction_cutoffs(3, i1, i2) = potential_coulomb(rcut2, tmp, &
+                  interaction_cutoffs(3, i1, i2) = potential_coulomb(pot1, rcut2, tmp, &
                                                                      1.0_dp, ewald_type, alpha, beta, 0.0_dp)
                END IF
             END DO

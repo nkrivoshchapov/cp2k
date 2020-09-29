@@ -10,6 +10,7 @@ MODULE pair_potential_coulomb
    USE kinds,                           ONLY: dp
    USE mathconstants,                   ONLY: oorootpi
    USE pw_poisson_types,                ONLY: do_ewald_none
+   USE pair_potential_types,            ONLY: pair_potential_single_type
 #include "./base/base_uses.f90"
 
    IMPLICIT NONE
@@ -33,9 +34,10 @@ CONTAINS
 !> \return ...
 !> \author Toon.Verstraelen@gmail.com
 ! **************************************************************************************************
-   FUNCTION potential_coulomb(r2, fscalar, qfac, ewald_type, alpha, beta, &
+   FUNCTION potential_coulomb(pot, r2, fscalar, qfac, ewald_type, alpha, beta, &
                               interaction_cutoff)
 
+      TYPE(pair_potential_single_type), POINTER          :: pot
       REAL(KIND=dp), INTENT(IN)                          :: r2
       REAL(KIND=dp), INTENT(INOUT)                       :: fscalar
       REAL(KIND=dp), INTENT(IN)                          :: qfac
@@ -47,7 +49,7 @@ CONTAINS
 
       REAL(KIND=dp)                                      :: r, x1, x2
 
-      r = SQRT(r2)
+      r = SQRT(r2 + 0.0_dp*pot%set(0)%lj%sigma6**2)
       IF (beta > 0.0_dp) THEN
          IF (ewald_type == do_ewald_none) THEN
             x2 = r*beta

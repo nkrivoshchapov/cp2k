@@ -117,6 +117,7 @@ MODULE pair_potential_types
       REAL(KIND=dp) :: epsilon
       REAL(KIND=dp) :: sigma6
       REAL(KIND=dp) :: sigma12
+      REAL(KIND=dp) :: lambda
    END TYPE Lj_pot_type
 
 ! **************************************************************************************************
@@ -346,6 +347,7 @@ CONTAINS
          SELECT CASE (pot1%type(i))
          CASE (lj_type, lj_charmm_type)
             IF ((pot1%set(i)%lj%epsilon == pot2%set(i)%lj%epsilon) .AND. &
+                (pot1%set(i)%lj%lambda == pot2%set(i)%lj%lambda) .AND. &
                 (pot1%set(i)%lj%sigma6 == pot2%set(i)%lj%sigma6) .AND. &
                 (pot1%set(i)%lj%sigma12 == pot2%set(i)%lj%sigma12)) mycompare = .TRUE.
          CASE (wl_type)
@@ -1215,6 +1217,7 @@ CONTAINS
       lj_dest%epsilon = lj_source%epsilon
       lj_dest%sigma6 = lj_source%sigma6
       lj_dest%sigma12 = lj_source%sigma12
+      lj_dest%lambda = lj_source%lambda
    END SUBROUTINE pair_potential_lj_copy
 
 ! **************************************************************************************************
@@ -1229,6 +1232,7 @@ CONTAINS
       lj%epsilon = 0.0_dp
       lj%sigma6 = 0.0_dp
       lj%sigma12 = 0.0_dp
+      lj%lambda = 0.0_dp
    END SUBROUTINE pair_potential_lj_clean
 
 ! **************************************************************************************************

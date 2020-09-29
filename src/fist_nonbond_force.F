@@ -382,19 +382,19 @@ CONTAINS
                         fscalar = 0.0_dp
                         IF (shell_a == 0) THEN
                            ! atom a is a plain ion and can have beta_a > 0
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qeff_a*qcore_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qeff_a*qcore_b, &
                                                       ewald_type, alpha, beta_a, &
                                                       ei_interaction_cutoffs(2, kind_a, kind_b))
                            CALL add_force_nonbond(fatom_a, fcore_b, pv, fscalar, rab, use_virial)
                         ELSE IF (shell_b == 0) THEN
                            ! atom b is a plain ion and can have beta_b > 0
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qcore_a*qeff_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qcore_a*qeff_b, &
                                                       ewald_type, alpha, beta_b, &
                                                       ei_interaction_cutoffs(2, kind_b, kind_a))
                            CALL add_force_nonbond(fcore_a, fatom_b, pv, fscalar, rab, use_virial)
                         ELSE
                            ! core-core interaction is always pure point charge
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qcore_a*qcore_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qcore_a*qcore_b, &
                                                       ewald_type, alpha, 0.0_dp, &
                                                       ei_interaction_cutoffs(1, kind_a, kind_b))
                            CALL add_force_nonbond(fcore_a, fcore_b, pv, fscalar, rab, use_virial)
@@ -414,7 +414,7 @@ CONTAINS
                         END IF
                         IF (fac_ei > 0) THEN
                            ! note that potential_coulomb increments fscalar
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qshell_a*qshell_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qshell_a*qshell_b, &
                                                       ewald_type, alpha, beta, &
                                                       ei_interaction_cutoffs(3, kind_a, kind_b))
                            etot = etot + energy
@@ -427,7 +427,7 @@ CONTAINS
                            rab2 = rab2_list(2)
                            fscalar = 0.0_dp
                            ! swap kind_a and kind_b to get the right cutoff
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qcore_a*qshell_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qcore_a*qshell_b, &
                                                       ewald_type, alpha, beta_b, &
                                                       ei_interaction_cutoffs(2, kind_b, kind_a))
                            etot = etot + energy
@@ -437,7 +437,7 @@ CONTAINS
                            rab = rab_list(:, 3)
                            rab2 = rab2_list(3)
                            fscalar = 0.0_dp
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qshell_a*qcore_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qshell_a*qcore_b, &
                                                       ewald_type, alpha, beta_a, &
                                                       ei_interaction_cutoffs(2, kind_a, kind_b))
                            etot = etot + energy
@@ -455,7 +455,7 @@ CONTAINS
                         END IF
                         IF (fac_ei > 0) THEN
                            ! note that potential_coulomb increments fscalar
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qeff_a*qshell_b, &
+                           energy = potential_coulomb(pot,rab2, fscalar, fac_ei*qeff_a*qshell_b, &
                                                       ewald_type, alpha, beta, &
                                                       ei_interaction_cutoffs(3, kind_a, kind_b))
                            etot = etot + energy
@@ -473,7 +473,7 @@ CONTAINS
                         END IF
                         IF (fac_ei > 0) THEN
                            ! note that potential_coulomb increments fscalar
-                           energy = potential_coulomb(rab2, fscalar, fac_ei*qshell_a*qeff_b, &
+                           energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qshell_a*qeff_b, &
                                                       ewald_type, alpha, beta, &
                                                       ei_interaction_cutoffs(3, kind_a, kind_b))
                            etot = etot + energy
@@ -495,7 +495,7 @@ CONTAINS
                      END IF
                      IF (fac_ei > 0) THEN
                         ! note that potential_coulomb increments fscalar
-                        energy = potential_coulomb(rab2, fscalar, fac_ei*qeff_a*qeff_b, &
+                        energy = potential_coulomb(pot, rab2, fscalar, fac_ei*qeff_a*qeff_b, &
                                                    ewald_type, alpha, beta, &
                                                    ei_interaction_cutoffs(3, kind_a, kind_b))
                         etot = etot + energy
